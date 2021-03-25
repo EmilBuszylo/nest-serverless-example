@@ -1,0 +1,42 @@
+version: 2.1
+orbs:
+  node: circleci/node@3.0.0
+  
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: circleci/node:12.20.2
+
+jobs:
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+      - run:
+          name: Install Serverless CLI and dependencies
+          command: |
+              sudo npm i -g serverless
+              npm install
+              sudo apt-get install awscli
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-
+      - run:
+          name: Deploy application
+          command: |
+            chmod +x assume-role.sh
+            source assume-role.sh
+            sls deploy --stage staging
+
+workflows:
+  sls_deploy:
+    jobs:
+      - build
