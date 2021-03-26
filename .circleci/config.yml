@@ -73,7 +73,7 @@ jobs:
 
       - run:
           name: Run aws cli with credentails
-          command: assume_role
+          command: commands.assume_role
 
       - run:
           name: Deploy application
