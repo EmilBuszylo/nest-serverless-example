@@ -1,33 +1,34 @@
-import slsw from "serverless-webpack";
+const webpack = require('webpack');
+const path = require('path');
+const slsw = require('serverless-webpack');
 
-import nodeExternals from "webpack-node-externals";
-import webpack from "webpack";
-const path = require("path");
-const mode = slsw.lib.webpack.isLocal ? "development" : "production";
+const nodeExternals = require('webpack-node-externals');
+
+const mode = slsw.lib.webpack.isLocal ? 'development' : 'production';
 
 module.exports = {
   mode,
-  target: "node",
+  target: 'node',
   entry: slsw.lib.entries,
-  externals: [nodeExternals(), "newrelic"],
+  externals: [nodeExternals(), 'newrelic'],
   resolve: {
-    extensions: [".ts"],
+    extensions: ['.ts'],
   },
   output: {
-    libraryTarget: "commonjs",
-    path: path.resolve(__dirname, ".webpack"),
-    filename: "[name].js",
+    libraryTarget: 'commonjs',
+    path: path.resolve(__dirname, '.webpack'),
+    filename: '[name].js',
   },
   module: {
     rules: [
       {
         test: /\.ts?$/,
-        loader: "ts-loader",
+        loader: 'ts-loader',
         exclude: /node_modules/,
         options: {
           transpileOnly: true,
         },
       },
     ],
-  },
+  }
 };

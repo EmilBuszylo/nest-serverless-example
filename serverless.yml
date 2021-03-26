@@ -5,14 +5,14 @@ plugins:
   - serverless-plugin-optimize
   - serverless-offline
   - serverless-webpack
-  -
+
 package:
   individually: true
 
 custom:
   webpack:
     webpackConfig: webpack.config.js
-    packager: npm
+    packager: yarn
     excludeFiles: "**/*.spec.ts"
 
 provider:
