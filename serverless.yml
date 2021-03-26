@@ -2,12 +2,18 @@ service:
   name: nest-serverless-example
 
 plugins:
-  - '@hewmen/serverless-plugin-typescript'
   - serverless-plugin-optimize
   - serverless-offline
-
+  - serverless-webpack
+  -
 package:
   individually: true
+
+custom:
+  webpack:
+    webpackConfig: webpack.config.js
+    packager: npm
+    excludeFiles: "**/*.spec.ts"
 
 provider:
   name: aws
