@@ -70,6 +70,11 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-
+
+      - run:
+          name: Run aws cli with credentails
+          command: assume_role
+
       - run:
           name: Deploy application
           command: |
