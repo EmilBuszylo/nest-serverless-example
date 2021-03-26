@@ -4,14 +4,6 @@ orbs:
   node: circleci/node@3.0.0
   assume-role: airswap/assume-role@0.2.0
 
-commands:
-  test_role:
-    steps:
-      - assume-role:
-          account: "659344654752"
-          role: aws:iam::659344654752:role/app-ci-stg-deployment
-          profile_name: ci-app-deployment
-
 # commands:
 #   assume_role:
 #       description: Installs AWS CLI, setup the IAM user keys and assume specified role
@@ -80,13 +72,11 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies- 
-      - run:
-          name: test
-          command: test_role
+      - assume-role/assume-role
       - run:
           name: Deploy application
           command: |
-            sls deploy --stage staging assume_role/role-name  
+            sls deploy --stage staging 
 
 workflows:
   sls_deploy:
