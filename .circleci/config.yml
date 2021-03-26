@@ -80,6 +80,7 @@ jobs:
           name: Install Serverless CLI and dependencies
           command: |
               sudo npm i -g serverless
+              sudo apt-get install awscli
       - assume-role/assume-role
       - run:
           name: Deploy application
