@@ -61,7 +61,7 @@ jobs:
       - run:
           name: Configure AWS Secret Access Key ID
           command: |
-            aws configure set aws_secret_access_key \
+            aws configure set secret_access_key \
             $<<parameters.aws-secret-access-key>> \
             --profile <<parameters.profile-name>>
 
