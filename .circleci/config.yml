@@ -1,6 +1,5 @@
 version: 2.1
 orbs:
-  aws-cli: circleci/aws-cli@0.1.9
   node: circleci/node@3.0.0
   assume-role: airswap/assume-role@0.2.0
 
@@ -50,28 +49,37 @@ defaults: &defaults
   docker:
     - image: circleci/node:12.20.2
 
+yarn_cache: &yarn_cache
+  keys:
+    - node-deps-node12-{{ checksum "yarn.lock" }}
+    # fallback to using the latest cache if no exact match is found
+    - node-deps-node12-
+
+deploy_cache: &deploy_cache
+  key: last-deploy-sha
+
+yarn_install: &yarn_install
+  name: Install Dependencies
+  command: yarn install --frozen-lockfile --non-interactive
+
 jobs:
   build:
     <<: *defaults
     steps:
       - checkout
-      # - assume-role/install
-      # Download and cache dependencies
       - restore_cache:
-          keys:
-          - v1-dependencies-
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
+          <<: *yarn_cache
+      - run:
+          <<: *yarn_install
+      - save_cache:
+          key: node-deps-node12-{{ checksum "yarn.lock" }}
+          paths:
+            - ~/.cache
+            - node_modules
       - run:
           name: Install Serverless CLI and dependencies
           command: |
               sudo npm i -g serverless
-              npm install
-              sudo apt-get install awscli
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies- 
       - assume-role/assume-role
       - run:
           name: Deploy application
