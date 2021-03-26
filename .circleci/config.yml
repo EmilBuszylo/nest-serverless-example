@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  node: circleci/node@3.0.0
+  aws-cli: circleci/aws-cli@0.1.9
   
 defaults: &defaults
   working_directory: ~/repo
