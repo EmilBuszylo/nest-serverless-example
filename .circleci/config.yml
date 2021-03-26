@@ -72,8 +72,8 @@ jobs:
                 --profile <<parameters.profile-name>>
           name: Configure AWS profile role
       - run:
-          command: aws configure set source_profile default --profile <<parameters.profile-name>> list
-          name: Show configure list 
+          command: aws configure set source_profile default --profile <<parameters.profile-name>>
+          name: Set secure profile
       - run:
           command: aws configure --profile <<parameters.profile-name>> list
           name: Show configure list 
