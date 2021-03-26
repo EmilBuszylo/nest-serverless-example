@@ -2,47 +2,56 @@ version: 2.1
 orbs:
   aws-cli: circleci/aws-cli@0.1.9
   node: circleci/node@3.0.0
+  assume-role: airswap/assume-role@0.2.0
 
 commands:
-  assume_role:
-      description: Installs AWS CLI, setup the IAM user keys and assume specified role
-      parameters:
-        access_key_id:
-          description: AWS Access Key ID Variable Name
-          type: env_var_name
-          default: AWS_ACCESS_KEY_ID
-        secret_access_key:
-          description: AWS Secret Access Key Variable Name
-          type: env_var_name
-          default: AWS_SECRET_ACCESS_KEY_ID
-        profile_name:
-          description: AWS Profile Name
-          type: string
-          default: ci-app-deployment
-        account:
-          description: AWS account in which the assumed role is
-          type: string
-          default: "659344654752"
-        role:
-          description: Role name
-          type: string
-          default: aws:iam::659344654752:role/app-ci-stg-deployment
-      steps:
-        - aws-cli/install
-        - run: 
-            name: Configure CircleCI IAM user
-            command: |
-              aws configure set aws_access_key_id $<< parameters.access_key_id >> --profile << parameters.profile_name >> && \
-              aws configure set aws_secret_access_key $<< parameters.secret_access_key >> --profile << parameters.profile_name >> && \
-              cp .circleci/config ~/.aws/config
+  test_role:
+    steps:
+      - assume-role:
+          account: "659344654752"
+          role: aws:iam::659344654752:role/app-ci-stg-deployment
+          profile_name: ci-app-deployment
+
+# commands:
+#   assume_role:
+#       description: Installs AWS CLI, setup the IAM user keys and assume specified role
+#       parameters:
+#         access_key_id:
+#           description: AWS Access Key ID Variable Name
+#           type: env_var_name
+#           default: AWS_ACCESS_KEY_ID
+#         secret_access_key:
+#           description: AWS Secret Access Key Variable Name
+#           type: env_var_name
+#           default: AWS_SECRET_ACCESS_KEY_ID
+#         profile_name:
+#           description: AWS Profile Name
+#           type: string
+#           default: ci-app-deployment
+#         account:
+#           description: AWS account in which the assumed role is
+#           type: string
+#           default: "659344654752"
+#         role:
+#           description: Role name
+#           type: string
+#           default: aws:iam::659344654752:role/app-ci-stg-deployment
+#       steps:
+#         - aws-cli/install
+#         - run: 
+#             name: Configure CircleCI IAM user
+#             command: |
+#               aws configure set aws_access_key_id $<< parameters.access_key_id >> --profile << parameters.profile_name >> && \
+#               aws configure set aws_secret_access_key $<< parameters.secret_access_key >> --profile << parameters.profile_name >> && \
+#               cp .circleci/config ~/.aws/config
             
-        - run: 
-            name: Assume AWS role and generate temporary credentials
-            command: |
-              assumed_role=$(aws sts assume-role --role-arn "arn:aws:iam::<< parameters.account >>:role/<< parameters.role >>" --role-session-name "RoleSession1" --profile << parameters.profile_name >>) && \
-              aws configure set aws_access_key_id $(echo $assumed_role | jq .Credentials.AccessKeyId | xargs) --profile << parameters.profile_name >> && \
-              aws configure set aws_secret_access_key $(echo $assumed_role | jq .Credentials.SecretAccessKey | xargs) --profile << parameters.profile_name >> && \
-              aws configure set aws_session_token $(echo $assumed_role | jq .Credentials.SessionToken | xargs) --profile << parameters.profile_name >>
+#         - run: 
+#             name: Assume AWS role and generate temporary credentials
+#             command: |
+#               assumed_role=$(aws sts assume-role --role-arn "arn:aws:iam::<< parameters.account >>:role/<< parameters.role >>" --role-session-name "RoleSession1" --profile << parameters.profile_name >>) && \
+#               aws configure set aws_access_key_id $(echo $assumed_role | jq .Credentials.AccessKeyId | xargs) --profile << parameters.profile_name >> && \
+#               aws configure set aws_secret_access_key $(echo $assumed_role | jq .Credentials.SecretAccessKey | xargs) --profile << parameters.profile_name >> && \
+#               aws configure set aws_session_token $(echo $assumed_role | jq .Credentials.SessionToken | xargs) --profile << parameters.profile_name >>
 
 defaults: &defaults
   working_directory: ~/repo
@@ -54,7 +63,7 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - assume_role      
+      # - assume-role/install
       # Download and cache dependencies
       - restore_cache:
           keys:
@@ -70,11 +79,14 @@ jobs:
       - save_cache:
           paths:
             - node_modules
-          key: v1-dependencies-
+          key: v1-dependencies- 
+      - run:
+          name: test
+          command: test_role
       - run:
           name: Deploy application
           command: |
-            sls deploy --stage staging
+            sls deploy --stage staging assume_role/role-name  
 
 workflows:
   sls_deploy:
