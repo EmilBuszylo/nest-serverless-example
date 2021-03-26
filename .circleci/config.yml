@@ -9,6 +9,25 @@ defaults: &defaults
 
 jobs:
   build:
+    parameters:
+      aws-access-key-id:
+        default: AWS_ACCESS_KEY_ID
+        description: |
+                  AWS access key id for IAM role. Set this to the name of
+                  the environment variable you will use to hold this
+                  value, i.e. AWS_ACCESS_KEY.
+        type: env_var_name
+      aws-secret-access-key:
+        default: AWS_SECRET_ACCESS_KEY
+        description: |
+            AWS secret key for IAM role. Set this to the name of
+            the environment variable you will use to hold this
+            value, i.e. $AWS_SECRET_ACCESS_KEY.
+        type: env_var_name
+      profile-name:
+          default: serverless-app-deployment
+          description: Profile name to be configured.
+          type: string
     <<: *defaults
   
     steps:
@@ -26,24 +45,32 @@ jobs:
               npm install
               sudo apt-get install awscli
       - run:
+          name: visibility test
+          command: echo $<<parameters.aws-access-key-id>>
+      - run:
           name: Configure AWS Access Key ID
           command: |
               aws configure set aws_access_key_id \
-              AWS_ACCESS_KEY_ID \
-              --profile 'serverless-app-deployment'
+              $<<parameters.aws-access-key-id>> \
+              --profile <<parameters.profile-name>>
 
       - run:
           name: Configure AWS Secret Access Key ID
           command: |
             aws configure set aws_secret_access_key_id \
-            AWS_SECRET_ACCESS_KEY_ID \
-            --profile 'serverless-app-deployment'
+            $<<parameters.aws-secret-access-key>> \
+            --profile <<parameters.profile-name>>
 
       - run:
           name: Configure AWS default region
           command: |
-            aws configure set region 'eu-central-1' \
-            --profile 'serverless-app-deployment'
+            aws configure set region "eu-central-1" \
+            --profile <<parameters.profile-name>>
+      - run:
+          command: |
+              aws configure set role_arn "arn:aws:iam::659344654752:role/app-ci-stg-deployment" \
+                --profile <<parameters.profile-name>>
+          name: Configure AWS profile role
 
       - save_cache:
           paths:
