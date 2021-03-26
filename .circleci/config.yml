@@ -1,7 +1,49 @@
 version: 2.1
 orbs:
   aws-cli: circleci/aws-cli@0.1.9
-  
+  node: circleci/node@3.0.0
+
+  commands:
+    assume_role:
+       description: Installs AWS CLI, setup the IAM user keys and assume specified role
+       parameters:
+          access_key_id:
+            description: AWS Access Key ID Variable Name
+            type: env_var_name
+            default: AWS_ACCESS_KEY_ID
+          secret_access_key:
+            description: AWS Secret Access Key Variable Name
+            type: env_var_name
+            default: AWS_SECRET_ACCESS_KEY_ID
+          profile_name:
+            description: AWS Profile Name
+            type: string
+            default: ci-app-deployment
+          account:
+            description: AWS account in which the assumed role is
+            type: string
+            default: 659344654752
+          role:
+            description: Role name
+            type: string
+            default: aws:iam::659344654752:role/app-ci-stg-deployment
+       steps:
+          - aws-cli/install
+          - run: 
+              name: Configure CircleCI IAM user
+              command: |
+                aws configure set aws_access_key_id $<< parameters.access_key_id >> --profile << parameters.profile_name >> && \
+                aws configure set aws_secret_access_key $<< parameters.secret_access_key >> --profile << parameters.profile_name >> && \
+                cp .circleci/config ~/.aws/config
+              
+          - run: 
+              name: Assume AWS role and generate temporary credentials
+              command: |
+                assumed_role=$(aws sts assume-role --role-arn "arn:aws:iam::<< parameters.account >>:role/<< parameters.role >>" --role-session-name "RoleSession1" --profile << parameters.profile_name >>) && \
+                aws configure set aws_access_key_id $(echo $assumed_role | jq .Credentials.AccessKeyId | xargs) --profile << parameters.profile_name >> && \
+                aws configure set aws_secret_access_key $(echo $assumed_role | jq .Credentials.SecretAccessKey | xargs) --profile << parameters.profile_name >> && \
+                aws configure set aws_session_token $(echo $assumed_role | jq .Credentials.SessionToken | xargs) --profile << parameters.profile_name >>
+
 defaults: &defaults
   working_directory: ~/repo
   docker:
@@ -9,27 +51,7 @@ defaults: &defaults
 
 jobs:
   build:
-    parameters:
-      aws-access-key-id:
-        default: AWS_ACCESS_KEY_ID
-        description: |
-                  AWS access key id for IAM role. Set this to the name of
-                  the environment variable you will use to hold this
-                  value, i.e. AWS_ACCESS_KEY.
-        type: env_var_name
-      aws-secret-access-key:
-        default: AWS_SECRET_ACCESS_KEY_ID
-        description: |
-            AWS secret key for IAM role. Set this to the name of
-            the environment variable you will use to hold this
-            value, i.e. $AWS_SECRET_ACCESS_KEY_ID.
-        type: env_var_name
-      profile-name:
-          default: serverless-app-deployment
-          description: Profile name to be configured.
-          type: string
     <<: *defaults
-  
     steps:
       - checkout
       # Download and cache dependencies
@@ -42,43 +64,15 @@ jobs:
           name: Install Serverless CLI and dependencies
           command: |
               sudo npm i -g serverless
-              npm install
-              sudo apt-get install awscli
+              # npm install
+              # sudo apt-get install awscli
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-
       - run:
-          name: visibility test
-          command: echo $<<parameters.aws-access-key-id>>
-      - run:
-          name: Configure AWS Access Key ID
-          command: |
-              aws configure set aws_access_key_id \
-              $<<parameters.aws-access-key-id>> \
-              --profile <<parameters.profile-name>>
-
-      - run:
-          name: Configure AWS Secret Access Key ID
-          command: |
-            aws configure set aws_secret_access_key \
-            $<<parameters.aws-secret-access-key>> \
-            --profile <<parameters.profile-name>>
-
-      - run:
-          name: Configure AWS default region
-          command: |
-            aws configure set region eu-central-1 \
-            --profile <<parameters.profile-name>>
-
-      - run:
           name: Deploy application
           command: |
-            aws configure set aws_access_key_id $<<parameters.aws-access-key-id>> --profile <<parameters.profile-name>>
-            aws configure set aws_secret_access_key $<<parameters.aws-secret-access-key>> --profile <<parameters.profile-name>>
-            aws configure set region eu-central-1 --profile <<parameters.profile-name>>
-            chmod +x assume-role.sh
-            source assume-role.sh
             sls deploy --stage staging
 
 workflows:
