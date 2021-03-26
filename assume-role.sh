@@ -11,6 +11,6 @@ temp_role=$(aws sts assume-role \
      --role-arn $role_arn \
      --role-session-name $role_session_name)
 
-export AWS_ACCESS_KEY_ID=$(echo $temp_role | jq -r .Credentials.AccessKeyId)
-export AWS_SECRET_ACCESS_KEY=$(echo $temp_role | jq -r .Credentials.SecretAccessKey)
-export AWS_SESSION_TOKEN=$(echo $temp_role | jq -r .Credentials.SessionToken)
+export AWS_ACCESS_KEY_ID=$(echo $temp_role | jq .Credentials.AccessKeyId | xargs)
+export AWS_SECRET_ACCESS_KEY=$(echo $temp_role | jq .Credentials.SecretAccessKey | xargs)
+export AWS_SESSION_TOKEN=$(echo $temp_role | jq .Credentials.SessionToken | xargs)
