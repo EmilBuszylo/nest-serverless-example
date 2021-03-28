@@ -13,14 +13,17 @@ custom:
     webpackConfig: webpack.config.js
     packager: yarn
     excludeFiles: "**/*.spec.ts"
+    includeModules: true
 
 provider:
   name: aws
   runtime: nodejs12.x
   region: eu-central-1
+  stage: ${opt:stage, 'develop'}
 
 functions:
   main: # The name of the lambda function
+    tracing: true,
     handler: src/handler.handler # The module 'handler' is exported in the file 'src/lambda'
     events:
       - http:
