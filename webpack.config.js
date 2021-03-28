@@ -10,7 +10,7 @@ module.exports = {
   mode,
   target: 'node',
   entry: slsw.lib.entries,
-  externals: [nodeExternals(), 'newrelic'],
+  externals: [nodeExternals()],
   resolve: {
     extensions: ['.ts'],
   },
