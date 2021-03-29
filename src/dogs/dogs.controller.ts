@@ -9,6 +9,6 @@ export class dogsController {
 
   @Get(":id")
   getCurrent(@Param("id") id: string) {
-    return "get text hauu";
+    return "get text hauudddd";
   }
 }
