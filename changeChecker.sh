@@ -1,7 +1,7 @@
 #!/bin/bash
 
 REF=HEAD
-SINCE=origin/main
+SINCE=origin/master
 DIR_TO_CHECK=src
 
 MERGE_BASE=$(git merge-base ${SINCE} ${REF})
