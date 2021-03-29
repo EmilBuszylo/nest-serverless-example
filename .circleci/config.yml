@@ -46,8 +46,21 @@ jobs:
           command: |
             sls package --stage staging -p ./dist
             sls deploy --stage staging  --package ./dist
+  checktest:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: check test
+          command: echo "test"
+      - run:
+          name: script test
+          command: |
+            changeChecker.sh
 
 workflows:
   sls_deploy:
+    when:
+      equal: [master, << pipeline.git.branch >>]
     jobs:
-      - build
+      - checktest
