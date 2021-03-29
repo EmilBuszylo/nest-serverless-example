@@ -61,7 +61,5 @@ jobs:
 
 workflows:
   sls_deploy:
-    when:
-      equal: [master, << pipeline.git.branch >>]
     jobs:
       - checktest
