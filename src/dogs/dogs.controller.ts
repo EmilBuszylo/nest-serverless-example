@@ -4,11 +4,11 @@ import { Body, Controller, Get, Param, Post, Req, Res } from "@nestjs/common";
 export class dogsController {
   @Post()
   create(@Body() data: { data: { text: string }}) {
-    return `create ${data.data.text} hau burkk`;
+    return `create ${data.data.text} hau bark`;
   }
 
   @Get(":id")
   getCurrent(@Param("id") id: string) {
-    return "get text hauudddd";
+    return "get text hauu";
   }
 }
