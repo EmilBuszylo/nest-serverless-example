@@ -67,14 +67,16 @@ jobs:
           command: |
             chmod +x changeChecker.sh
             source changeChecker.sh
-      - store_artifacts:
-          path: papa
+      - save_cache:
+          key: build-{{ .Environment.CIRCLE_WORKFLOW_ID }}
+          paths:
+            - papa
   checktest:
     <<: *defaults
     steps:
       - checkout
-      - store_artifacts:
-          path: papa
+      - restore_cache:
+          key: papa-{{ .Environment.CIRCLE_WORKFLOW_ID }}
       - run: ls -a
       - run: 
           name: PAPA
