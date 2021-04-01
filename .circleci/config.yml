@@ -46,7 +46,7 @@ jobs:
           command: |
             sls package --stage staging -p ./dist
             sls deploy --stage staging  --package ./dist
-  checktest:
+  prechecktest:
     <<: *defaults
     steps:
       - checkout
@@ -67,10 +67,22 @@ jobs:
           command: |
             chmod +x changeChecker.sh
             source changeChecker.sh
-
+  checktest:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: ls -a
+      - run: 
+          name: PAPA
+          command: | 
+            cd papa
+            ls -a
 workflows:
   sls_deploy:
     # when:
     #   equal: [master, << pipeline.git.branch >>]
     jobs:
-      - checktest
+      - prechecktest
+      - checktest:
+          requires:
+            - prechecktest
