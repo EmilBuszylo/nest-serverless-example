@@ -93,9 +93,9 @@ jobs:
       - save_cache:
           key: build-{{ .Environment.CIRCLE_WORKFLOW_ID }}
           paths:
-            - papa
+            - dist
       - store_artifacts:
-          path: papa
+          path: dist
   checktest:
     <<: *defaults
     steps:
