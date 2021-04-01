@@ -77,13 +77,12 @@ jobs:
       - run:
           <<: *set_env
       - run: ls -a
-      - run: mkdir papa
-      - run: cp package.json papa
+      - run: cp package.json dist
       - run: ls -a
       - run: 
           name: PAPA
           command: | 
-            cd papa
+            cd dist
             ls -a
       - run:
           name: script test
@@ -93,9 +92,9 @@ jobs:
       - save_cache:
           key: build-{{ .Environment.CIRCLE_WORKFLOW_ID }}
           paths:
-            - dist/papa
+            - dist
       - store_artifacts:
-          path: dist/papa
+          path: dist
   checktest:
     <<: *defaults
     steps:
