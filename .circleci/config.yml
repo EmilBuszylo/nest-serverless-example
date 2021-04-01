@@ -54,6 +54,11 @@ jobs:
           name: check test
           command: echo "test"
       - run: ls -a
+      - run: mkdir test
+      - run: cp package.json test
+      - run: ls -a
+      - run: cd test
+      - run: ls -a
       - run:
           name: script test
           command: |
