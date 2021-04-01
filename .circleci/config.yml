@@ -108,7 +108,7 @@ jobs:
       - run: 
           name: PAPA
           command: | 
-            cd papa
+            cd dist/papa
             ls -a
 workflows:
   sls_deploy:
