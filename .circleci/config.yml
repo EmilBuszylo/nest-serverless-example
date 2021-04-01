@@ -57,8 +57,11 @@ jobs:
       - run: mkdir papa
       - run: cp package.json papa
       - run: ls -a
-      - run: cd papa
-      - run: ls -a
+      - run: 
+          name: PAPA
+          command: | 
+            cd papa
+            ls -a
       - run:
           name: script test
           command: |
