@@ -67,6 +67,8 @@ jobs:
           command: |
             chmod +x changeChecker.sh
             source changeChecker.sh
+      - store_artifacts:
+          path: papa
   checktest:
     <<: *defaults
     steps:
