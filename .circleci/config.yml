@@ -73,6 +73,8 @@ jobs:
     <<: *defaults
     steps:
       - checkout
+      - store_artifacts:
+          path: papa
       - run: ls -a
       - run: 
           name: PAPA
