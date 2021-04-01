@@ -94,6 +94,8 @@ jobs:
           key: build-{{ .Environment.CIRCLE_WORKFLOW_ID }}
           paths:
             - papa
+      - store_artifacts:
+          path: papa
   checktest:
     <<: *defaults
     steps:
